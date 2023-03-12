@@ -1,4 +1,5 @@
 import argparse
+import json
 from pprint import pprint
 
 from content.config import config
@@ -11,35 +12,37 @@ from yaml.loader import SafeLoader
 import hashlib
 
 
-def hash_file(directory, file):
-    unknown_hash = 0
+def hash_file(directory, file, logdir="data/"):
+    known_hash = 0
     with open(file, 'rb', buffering=0) as f:
         bytes = f.read()
         hash = hashlib.sha256(bytes).hexdigest()
-    #print(file.name)
     logfile = directory.replace("\\", "/")
-    logfile = "data/" + logfile.split("/")[-1].replace(" ", "_") + ".log"
+    logfile = logdir + logfile.split("/")[-1].replace(" ", "_") + ".json"
     if os.path.exists(logfile):
-        with open(logfile) as file:
-            hashes = [line.rstrip() for line in file]
-        if hash not in hashes:
-            hashes.append(hash)
-            unknown_hash = 1
+        with open(logfile) as db_file:
+            hashes = json.load(db_file)
+        for x in hashes:
+            for key in x:
+                if key == hash:
+                    known_hash = 1
+        if known_hash != 1:
+            hashes.append({hash: file})
     else:
-        hashes = [hash]
-        unknown_hash = 1
-    with open(logfile, 'w') as outfile:
-        for hash in hashes:
-            outfile.write(hash + '\n')
-    return unknown_hash
+        hashes = [{hash: file}]
+    with open(logfile, 'w') as db_file:
+        db_file.write(json.dumps(hashes, indent=4))
+        # for hash in hashes:
+        # outfile.write(hash + '\n')
+    return known_hash
 
 
-def get_images(path):
+def get_images(path, logdir="data/"):
     ext = [".png", ".jpg"]
     for file in os.listdir(path):
         if os.path.isfile(os.path.join(path, file)) and file.endswith(tuple(ext)):
             f = os.path.join(path, file)
-            if hash_file(path, f) == 1:
+            if hash_file(path, f, logdir=logdir) == 0:
                 t = re.sub(r"\.([^.]*?)$", ".yaml", f, count=0, flags=0)
                 if os.path.exists(t):
                     yield f, t
