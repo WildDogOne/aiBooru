@@ -1,4 +1,6 @@
 import argparse
+from pprint import pprint
+
 from content.config import config
 from content.danbooru import danbooru
 import os
@@ -6,6 +8,30 @@ from content.general import logger
 import re
 import yaml
 from yaml.loader import SafeLoader
+import hashlib
+
+
+def hash_file(directory, file):
+    unknown_hash = 0
+    with open(file, 'rb', buffering=0) as f:
+        bytes = f.read()
+        hash = hashlib.sha256(bytes).hexdigest()
+    #print(file.name)
+    logfile = directory.replace("\\", "/")
+    logfile = "data/" + logfile.split("/")[-1].replace(" ", "_") + ".log"
+    if os.path.exists(logfile):
+        with open(logfile) as file:
+            hashes = [line.rstrip() for line in file]
+        if hash not in hashes:
+            hashes.append(hash)
+            unknown_hash = 1
+    else:
+        hashes = [hash]
+        unknown_hash = 1
+    with open(logfile, 'w') as outfile:
+        for hash in hashes:
+            outfile.write(hash + '\n')
+    return unknown_hash
 
 
 def get_images(path):
@@ -13,14 +39,15 @@ def get_images(path):
     for file in os.listdir(path):
         if os.path.isfile(os.path.join(path, file)) and file.endswith(tuple(ext)):
             f = os.path.join(path, file)
-            t = re.sub(r"\.([^.]*?)$", ".yaml", f, count=0, flags=0)
-            if os.path.exists(t):
-                yield f, t
-            else:
-                defaults = {"rating": "s", "tags": ""}
-                with open(t, 'w') as outfile:
-                    yaml.dump(defaults, outfile, default_flow_style=False)
-                yield f, None
+            if hash_file(path, f) == 1:
+                t = re.sub(r"\.([^.]*?)$", ".yaml", f, count=0, flags=0)
+                if os.path.exists(t):
+                    yield f, t
+                else:
+                    defaults = {"rating": "s", "tags": ""}
+                    with open(t, 'w') as outfile:
+                        yaml.dump(defaults, outfile, default_flow_style=False)
+                    yield f, None
 
 
 def read_description_file(file):
