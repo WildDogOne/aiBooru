@@ -43,6 +43,8 @@ def hash_file(directory, file, logdir="data/"):
             db_file.write(json.dumps(hashes, indent=4))
             # for hash in hashes:
             # outfile.write(hash + '\n')
+    else:
+        logger.warning(f"File {file} has no description yaml, will be skipped")
     return known_hash
 
 
@@ -90,16 +92,16 @@ def upload_directory(directory=None):
     db = danbooru(config)
 
     for file, description in get_images(directory):
+        tags = ""
+        rating = "s"
         if description:
             x, y = read_description_file(description)
             if x:
                 rating = x
             if y:
                 tags = y
-        else:
-            tags = ""
-            rating = "s"
-        logger.info(file)
-        logger.info(rating)
+        logger.debug(file)
+        logger.debug(tags)
+        logger.debug(rating)
         db.create_post(filename=file, tag_string=tags, rating=rating)
-    logger.info("done")
+    logger.info("Done Processing Images")
