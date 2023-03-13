@@ -40,20 +40,6 @@ class danbooru():
                   "post[rating]": rating,
                   "post[source]": source,
                   "upload_media_asset_id": image_id}
-        # authenticity_token=Fb51Dq8Rarb5SCLzs5NQCxR-EJDpBJLwLv3Kb-z2RI5dq6QXSlpk4NUiHKXIVS2Sbelv5ZszbfmCwCawIgsWyg
-        # media_asset_id=4
-        # upload_media_asset_id=17
-        # post[source]=file://linus_happy.png
-        # post[rating]=
-        # post[rating]=g
-        # post[parent_id]=
-        # post[artist_commentary_title]=
-        # post[artist_commentary_desc]=
-        # post[translated_commentary_title]=
-        # post[translated_commentary_desc]=
-        # post[tag_string]=furry
-        # commit=Post
-        # post[is_pending]=0
         response = requests.request("POST", url, auth=self.basic, params=params)
         if response.status_code == 200:
             logger.info("Post Creation Success")
