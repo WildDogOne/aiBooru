@@ -136,8 +136,8 @@ def upload_directory(directory: str, force: bool):
                 rating = x
             if y:
                 tags = y
-        logger.info(file)
-        logger.info(tags)
-        logger.info(rating)
+        logger.debug(file)
+        logger.debug(tags)
+        logger.debug(rating)
         db.create_post(filename=file, tag_string=tags, rating=rating)
     logger.info("Done Processing Images")
