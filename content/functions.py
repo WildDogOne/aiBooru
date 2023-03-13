@@ -12,28 +12,37 @@ from yaml.loader import SafeLoader
 import hashlib
 
 
+def check_description_yaml(file):
+    t = re.sub(r"\.([^.]*?)$", ".yaml", file, count=0, flags=0)
+    if os.path.exists(t):
+        return True
+    else:
+        return False
+
+
 def hash_file(directory, file, logdir="data/"):
     known_hash = 0
-    with open(file, 'rb', buffering=0) as f:
-        bytes = f.read()
-        hash = hashlib.sha256(bytes).hexdigest()
-    logfile = directory.replace("\\", "/")
-    logfile = logdir + logfile.split("/")[-1].replace(" ", "_") + ".json"
-    if os.path.exists(logfile):
-        with open(logfile) as db_file:
-            hashes = json.load(db_file)
-        for x in hashes:
-            for key in x:
-                if key == hash:
-                    known_hash = 1
-        if known_hash != 1:
-            hashes.append({hash: file})
-    else:
-        hashes = [{hash: file}]
-    with open(logfile, 'w') as db_file:
-        db_file.write(json.dumps(hashes, indent=4))
-        # for hash in hashes:
-        # outfile.write(hash + '\n')
+    if check_description_yaml(file):
+        with open(file, 'rb', buffering=0) as f:
+            bytes = f.read()
+            hash = hashlib.sha256(bytes).hexdigest()
+        logfile = directory.replace("\\", "/")
+        logfile = logdir + logfile.split("/")[-1].replace(" ", "_") + ".json"
+        if os.path.exists(logfile):
+            with open(logfile) as db_file:
+                hashes = json.load(db_file)
+            for x in hashes:
+                for key in x:
+                    if key == hash:
+                        known_hash = 1
+            if known_hash != 1:
+                hashes.append({hash: file})
+        else:
+            hashes = [{hash: file}]
+        with open(logfile, 'w') as db_file:
+            db_file.write(json.dumps(hashes, indent=4))
+            # for hash in hashes:
+            # outfile.write(hash + '\n')
     return known_hash
 
 
@@ -50,7 +59,6 @@ def get_images(path, logdir="data/"):
                     defaults = {"rating": "s", "tags": ""}
                     with open(t, 'w') as outfile:
                         yaml.dump(defaults, outfile, default_flow_style=False)
-                    yield f, None
 
 
 def read_description_file(file):
