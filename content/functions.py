@@ -65,11 +65,12 @@ def hash_file(directory: str, file: str, logdir="data/"):
     return known_hash
 
 
-def get_images(path: str, logdir="data/"):
+def get_images(path: str, force: bool, logdir: str = "data/"):
     """
     Get images from path, and yield them if they are ready to be uploaded and not already sent
 
     :param path: Path of the directory to check for images to upload
+    :param force: Boolean value, if true the upload of all images will be enforced
     :param logdir: Optional directory for logdata used to track if images where alread uploaded
     :return: Yields a list of images in a generator
     """
@@ -77,7 +78,7 @@ def get_images(path: str, logdir="data/"):
     for file in os.listdir(path):
         if os.path.isfile(os.path.join(path, file)) and file.endswith(tuple(ext)):
             f = os.path.join(path, file)
-            if hash_file(path, f, logdir=logdir) == 0:
+            if hash_file(path, f, logdir=logdir) == 0 or force:
                 t = re.sub(r"\.([^.]*?)$", ".yaml", f, count=0, flags=0)
                 if os.path.exists(t):
                     yield f, t
@@ -116,16 +117,17 @@ def read_description_file(file: str):
     return rating, tags
 
 
-def upload_directory(directory: str):
+def upload_directory(directory: str, force: bool):
     """
     This function is used to upload images from a directory to Danbooru
 
     :param directory: Directory to scan for Images and upload them
+    :param force: Boolean value, if true the upload of all images will be enforced
     :return: Nothing
     """
     db = danbooru(config)
 
-    for file, description in get_images(directory):
+    for file, description in get_images(directory, force):
         tags = ""
         rating = "s"
         if description:
