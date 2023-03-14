@@ -12,21 +12,7 @@ from yaml.loader import SafeLoader
 import hashlib
 
 
-def check_description_yaml(file: str):
-    """
-    Check if description yaml exists
-
-    :param file: Image file to check for description yaml
-    :return: Returns true if description yaml exists
-    """
-    t = re.sub(r"\.([^.]*?)$", ".yaml", file, count=0, flags=0)
-    if os.path.exists(t):
-        return True
-    else:
-        return False
-
-
-def hash_file(directory: str, file: str, logdir="data/"):
+def hash_file(directory: str, file: str, logdir: str = "data/"):
     """
     Appends hash to json file
 
@@ -36,11 +22,17 @@ def hash_file(directory: str, file: str, logdir="data/"):
     :return: Returns 1 if hash is already known, meaning there is no need to push the image
     """
     known_hash = 0
-    if check_description_yaml(file):
+    known_description_hash = 0
+    description_file = re.sub(r"\.([^.]*?)$", ".yaml", file, count=0, flags=0)
+    if os.path.exists(description_file):
         # Make sha256 hash of file
         with open(file, 'rb', buffering=0) as f:
             bytes = f.read()
-            hash = hashlib.sha256(bytes).hexdigest()
+            file_hash = hashlib.sha256(bytes).hexdigest()
+        with open(description_file, 'rb', buffering=0) as f:
+            bytes = f.read()
+            description_file_hash = hashlib.sha256(bytes).hexdigest()
+
         # Dirty hack in case the script is run on Windows
         logfile = directory.replace("\\", "/")
         logfile = logdir + logfile.split("/")[-1].replace(" ", "_") + ".json"
@@ -52,17 +44,26 @@ def hash_file(directory: str, file: str, logdir="data/"):
                 hashes = json.load(db_file)
             for x in hashes:
                 for key in x:
-                    if key == hash:
+                    if key == file_hash:
                         known_hash = 1
+                    if key == description_file_hash:
+                        known_description_hash = 1
             if known_hash != 1:
-                hashes.append({hash: file})
+                hashes.append({file_hash: file})
+            if known_description_hash != 1:
+                hashes.append({description_file_hash: description_file})
         else:
-            hashes = [{hash: file}]
+            hashes = [{file_hash: file, description_file_hash: description_file}]
         with open(logfile, 'w') as db_file:
             db_file.write(json.dumps(hashes, indent=2))
     else:
         logger.warning(f"File {file} has no description yaml, will be skipped")
-    return known_hash
+    if known_hash == 1 and known_description_hash == 1:
+        logger.debug(f"File {file} does not need to be synced")
+        return False
+    else:
+        logger.debug(f"File {file} needs to be synced")
+        return True
 
 
 def get_images(path: str, force: bool, logdir: str = "data/"):
@@ -78,7 +79,7 @@ def get_images(path: str, force: bool, logdir: str = "data/"):
     for file in os.listdir(path):
         if os.path.isfile(os.path.join(path, file)) and file.endswith(tuple(ext)):
             f = os.path.join(path, file)
-            if hash_file(path, f, logdir=logdir) == 0 or force:
+            if hash_file(path, f, logdir=logdir) or force:
                 t = re.sub(r"\.([^.]*?)$", ".yaml", f, count=0, flags=0)
                 if os.path.exists(t):
                     yield f, t
