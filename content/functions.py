@@ -11,6 +11,8 @@ import yaml
 from yaml.loader import SafeLoader
 import hashlib
 
+from content.tagger import evaluate_image
+
 
 def hash_file(directory: str, file: str, logdir: str = "data/"):
     """
@@ -66,13 +68,14 @@ def hash_file(directory: str, file: str, logdir: str = "data/"):
         return True
 
 
-def get_images(path: str, force: bool, logdir: str = "data/"):
+def get_images(path: str, force: bool, logdir: str = "data/", tagging: bool = False):
     """
     Get images from path, and yield them if they are ready to be uploaded and not already sent
 
     :param path: Path of the directory to check for images to upload
     :param force: Boolean value, if true the upload of all images will be enforced
     :param logdir: Optional directory for logdata used to track if images where alread uploaded
+    :param tagging: Boolean value, if true DeepBooru will be used to make a guess of what tags could be used
     :return: Yields a list of images in a generator
     """
     ext = [".png", ".jpg"]
@@ -84,7 +87,12 @@ def get_images(path: str, force: bool, logdir: str = "data/"):
                 if os.path.exists(t):
                     yield f, t
                 else:
-                    defaults = {"rating": "s", "tags": ""}
+                    if tagging:
+                        x = evaluate_image(f)
+                        logger.info(f"Guessing tags for Image {file}")
+                        defaults = {"rating": "s", "tags": x}
+                    else:
+                        defaults = {"rating": "s", "tags": ""}
                     with open(t, 'w') as outfile:
                         yaml.dump(defaults, outfile, default_flow_style=False)
 
@@ -118,17 +126,18 @@ def read_description_file(file: str):
     return rating, tags
 
 
-def upload_directory(directory: str, force: bool):
+def upload_directory(directory: str = None, force: bool = False, tagging: bool = False):
     """
     This function is used to upload images from a directory to Danbooru
 
     :param directory: Directory to scan for Images and upload them
     :param force: Boolean value, if true the upload of all images will be enforced
+    :param tagging: Boolean value, if true DeepBooru will be used to make a guess of what tags could be used
     :return: Nothing
     """
     db = danbooru(config)
 
-    for file, description in get_images(directory, force):
+    for file, description in get_images(directory, force, tagging=tagging):
         tags = ""
         rating = "s"
         if description:

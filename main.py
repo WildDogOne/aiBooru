@@ -17,8 +17,13 @@ if __name__ == '__main__':
                         help="Force upload of all images, ignore state stored in data/*.json",
                         action='store_true',
                         required=False)
+    parser.add_argument("-t",
+                        "--tagging",
+                        help="If flag is set, the tagging Service DeepBooru will be used to give an example of what tags could be used.",
+                        action='store_true',
+                        required=False)
     args = parser.parse_args()
     if args.directory:
-        upload_directory(args.directory, args.force)
+        upload_directory(directory=args.directory, force=args.force, tagging=args.tagging)
     else:
         parser.print_help()

@@ -1,3 +1,14 @@
 Pybooru
-rich
-pyyaml
+rich~=13.3.2
+pyyaml~=6.0
+
+# Requirements for DeepDanbooru
+git+https://github.com/KichangKim/DeepDanbooru.git
+Click>=7.0
+numpy>=1.16.2
+scikit-image>=0.15.0
+tensorflow>=2.7.0
+tensorflow-io>=0.22.0
+requests>=2.22.0
+six>=1.13.0
+Pillow~=9.4.0
