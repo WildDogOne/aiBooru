@@ -88,9 +88,19 @@ def get_images(path: str, force: bool, logdir: str = "data/", tagging: bool = Fa
                     yield f, t
                 else:
                     if tagging:
-                        x = evaluate_image(f)
+                        tags, rating = evaluate_image(f)
+                        if rating == "rating:safe":
+                            rating = "g"  # General
+                        elif rating == "rating:questionable":
+                            rating = "q"  # Questionable
+                        elif rating == "rating:explicit":
+                            rating = "e"  # Explicit
+                        else:
+                            logger.error(f"Don't know what to do with {rating}")
+                            quit()
                         logger.info(f"Guessing tags for Image {file}")
-                        defaults = {"rating": "s", "tags": x}
+                        defaults = {"rating": rating, "tags": tags}
+                        # quit()
                     else:
                         defaults = {"rating": "s", "tags": ""}
                     with open(t, 'w') as outfile:

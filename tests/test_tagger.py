@@ -5,7 +5,7 @@ from content.tagger import evaluate_image
 
 class Test(TestCase):
     def test_evaluate_image(self):
-        actual = evaluate_image(input_image="./ytbheadeer.webp", project="../deepbooru")
+        tags, rating = evaluate_image(input_image="./ytbheadeer.webp", project="../deepbooru")
         expected = ['1boy',
                     'ball',
                     'earth (planet)',
@@ -24,4 +24,6 @@ class Test(TestCase):
                     'traditional media',
                     'watercolor (medium)',
                     'window']
-        self.assertEqual(expected, actual)
+        self.assertEqual(expected, tags)
+        self.assertEqual("rating:safe", rating)
+

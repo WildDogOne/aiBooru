@@ -53,9 +53,11 @@ def evaluate_image(input_image: str = None, model_url: str = None, project: str 
     result_tags_out = []
     # result_tags_print = []
     result_tags = []
+    rating = "s"
     for tag in tags:
         if result_dict[tag] >= threshold:
             if tag.startswith("rating:"):
+                rating = tag
                 continue
             result_tags_out.append(tag.replace('_', ' ').replace(':', ' '))
             # result_tags_print.append(f'{result_dict[tag]} {tag}')
@@ -64,4 +66,4 @@ def evaluate_image(input_image: str = None, model_url: str = None, project: str 
     # print('\n'.join(sorted(result_tags_print, reverse=True)))
     # pprint(result_tags_print)
 
-    return result_tags_out
+    return result_tags_out, rating
