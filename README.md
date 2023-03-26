@@ -55,7 +55,7 @@ If you don't provide a YAML file for an image, `aiBooru` will skip that image.
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for more information.
+See the `LICENSE` file for more information.
 
 ## Howto Install Danbooru
 
