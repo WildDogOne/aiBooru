@@ -1,7 +1,63 @@
 # aiBooru
 
-This project was built as a little howto for installing [Danbooru](https://github.com/danbooru/danbooru)
-and a little CLI project to get content into that danbooru.
+aiBooru is a CLI tool for uploading images to Danbooru-style image boards.
+
+## Requirements
+
+- Python 3.7 or higher
+- requests
+- PyYAML
+
+## Usage
+
+The `aiBooru` tool can be used to upload images from a directory to a Danbooru-style image board. Each image must have a
+corresponding YAML file that describes the image's tags and rating.
+
+To use `aiBooru`, run the following command:
+
+```bash
+python aibooru.py -d "/path/to/directory"
+```
+
+Replace `/path/to/directory` with the path to the directory containing the images you want to upload.
+
+By default, `aiBooru` will only upload images that haven't been uploaded before. If you want to force the upload of all
+images, use the `-f` or `--force` flag:
+
+```bash
+python aibooru.py -d "/path/to/directory" -f
+```
+
+If you want to use DeepBooru to generate tags for the images, use the `-t` or `--tagging` flag:
+
+```bash
+python aibooru.py -d "/path/to/directory" -t
+```
+
+## YAML File Format
+
+Each image must have a corresponding YAML file with the same name as the image file, but with a `.yaml` extension. The
+YAML file should have the following format:
+
+```markdown
+rating: [rating]
+tags:
+
+- [tag1]
+- [tag2]
+- ...
+```
+
+Replace `[rating]` with the rating of the image (`s`, `q`, or `e`). Replace `[tag1]`, `[tag2]`, etc. with the tags that
+describe the image.
+
+If you don't provide a YAML file for an image, `aiBooru` will skip that image.
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more information.
+
+## Howto Install Danbooru
 
 ## Installation on Docker Compose
 
