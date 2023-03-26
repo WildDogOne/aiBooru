@@ -5,7 +5,7 @@ from requests.auth import HTTPBasicAuth
 from content.general import logger
 
 
-class danbooru():
+class Danbooru:
     def __init__(self, config):
         """
         :param config: Config File with username, password and Base URL
@@ -31,8 +31,8 @@ class danbooru():
         if response.status_code == 201:
             return response.json()["id"]
         else:
-            pprint(response.json())
-            quit(1)
+            error_message = f"Failed to upload image: {response.json()}"
+            raise Exception(error_message)
 
     def _upload_to_post(self, image_id=None, tag_string="", rating="s", source=None):
         url = self.base_url + "/posts"
@@ -44,11 +44,10 @@ class danbooru():
         if response.status_code == 200:
             logger.info("Post Creation Success")
         else:
-            logger.error("Failed to create post")
-            pprint(logger.json())
+            error_message = f"Failed to create post: {response.json()}"
+            raise Exception(error_message)
 
-
-def get_user(self):
-    url = self.base_url + "/profile.json"
-    response = requests.request("GET", url, auth=self.basic)
-    pprint(response.json())
+    def get_user(self):
+        url = self.base_url + "/profile.json"
+        response = requests.request("GET", url, auth=self.basic)
+        pprint(response.json())

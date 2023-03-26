@@ -3,7 +3,7 @@ import json
 from pprint import pprint
 
 from content.config import config
-from content.danbooru import danbooru
+from content.danbooru import Danbooru
 import os
 from content.general import logger
 import re
@@ -145,7 +145,7 @@ def upload_directory(directory: str = None, force: bool = False, tagging: bool =
     :param tagging: Boolean value, if true DeepBooru will be used to make a guess of what tags could be used
     :return: Nothing
     """
-    db = danbooru(config)
+    db = Danbooru(config)
 
     for file, description in get_images(directory, force, tagging=tagging):
         tags = ""
