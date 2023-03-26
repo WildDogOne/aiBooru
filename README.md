@@ -51,7 +51,9 @@ tags:
 Replace `[rating]` with the rating of the image (`s`, `q`, or `e`). Replace `[tag1]`, `[tag2]`, etc. with the tags that
 describe the image.
 
-If you don't provide a YAML file for an image, `aiBooru` will skip that image.
+If you don't provide a YAML file for an image, `aiBooru` will skip uploading that image.
+If you have the -t flag it will interrogate the image with DeepDanbooru and write a YAML with the findings.
+If the -t flag is not set, the script will just generate a mostly empty YAML so you don't have to.
 
 ## License
 
